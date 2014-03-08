@@ -80,7 +80,7 @@ module RHC
     end
 
     def openshift_server
-      options.server || config['libra_server'] || "broker.startapp.bg"
+      options.server || config['libra_server'] || "api.startappcloud.com"
     end
 
     def new_client_for_options

@@ -108,7 +108,7 @@ module RHC
 
     global_option '-d', '--debug', "Turn on debugging", :hide => true
 
-    global_option '--server NAME', String, 'An StartApp server hostname (default: broker.startapp.bg)'
+    global_option '--server NAME', String, 'An StartApp server hostname (default: api.startappcloud.com)'
     global_option '-k', '--insecure', "Allow insecure SSL connections.  Potential security risk.", :hide => true
 
     global_option '--limit INTEGER', Integer, "Maximum number of simultaneous operations to execute.", :hide => true
@@ -153,10 +153,10 @@ module RHC
     end
 
     def openshift_server
-      to_host((options.server rescue nil) || ENV['LIBRA_SERVER'] || "broker.startapp.bg")
+      to_host((options.server rescue nil) || ENV['LIBRA_SERVER'] || "api.startappcloud.com")
     end
     def openshift_online_server?
-      openshift_server =~ /broker.startapp.bg$/i
+      openshift_server =~ /api.startappcloud.com$/i
     end
     def openshift_url
       "https://#{openshift_server}"
@@ -188,7 +188,7 @@ module RHC
     end
 
     def openshift_rest_endpoint
-      uri = to_uri((options.server rescue nil) || ENV['LIBRA_SERVER'] || "broker.startapp.bg")
+      uri = to_uri((options.server rescue nil) || ENV['LIBRA_SERVER'] || "api.startappcloud.com")
       uri.path = '/broker/rest/api' if uri.path.blank? || uri.path == '/'
       uri
     end

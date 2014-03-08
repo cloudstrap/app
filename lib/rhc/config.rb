@@ -124,7 +124,7 @@ module RHC
 
       @default_proxy = nil
 
-      @defaults.add('libra_server', 'broker.startapp.bg')
+      @defaults.add('libra_server', 'api.startappcloud.com')
       @env_config.add('libra_server', ENV['LIBRA_SERVER']) if ENV['LIBRA_SERVER']
       @env_config.add('libra_server', ENV['RHC_SERVER']) if ENV['RHC_SERVER']
 

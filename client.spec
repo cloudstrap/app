@@ -2,13 +2,13 @@
 %define gemversion %(echo %{version} | cut -d'.' -f1-3)
 
 Summary:       StartApp client management tools
-Name:          app
-Version: 0.1.6
+Name:          startapp
+Version: 0.1.7
 Release:       1%{?dist}
 Group:         Network/Daemons
 License:       ASL 2.0
 URL:           http://startapp.bg
-Source0:       app-%{version}.tar.gz
+Source0:       startapp-%{version}.tar.gz
 
 BuildRoot:     %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildRequires: ruby >= 1.8.5
@@ -29,7 +29,7 @@ Requires:      git
 Requires:      rubygem-net-ssh-multi
 %endif
 Obsoletes:     rhc-rest
-Provides:      rubygem-app
+Provides:      rubygem-startapp
 
 BuildArch:     noarch
 
@@ -73,19 +73,19 @@ fi
 LC_ALL=en_US.UTF-8
 
 # Package the gem
-gem build app.gemspec
+gem build startapp.gemspec
 
 mkdir -p .%{gemdir}
 # Ignore dependencies here because these will be handled by rpm
 gem install --install-dir $RPM_BUILD_ROOT/%{gemdir} --bindir $RPM_BUILD_ROOT/%{_bindir} --local -V --force --rdoc --ignore-dependencies \
-     app-%{version}.gem
+     startapp-%{version}.gem
 
 # Copy the bash autocompletion script
 mkdir -p "$RPM_BUILD_ROOT/etc/bash_completion.d/"
-cp autocomplete/rhc_bash $RPM_BUILD_ROOT/etc/bash_completion.d/app
+cp autocomplete/rhc_bash $RPM_BUILD_ROOT/etc/bash_completion.d/startapp
 
-cp LICENSE $RPM_BUILD_ROOT/%{gemdir}/gems/app-%{version}/LICENSE
-cp COPYRIGHT $RPM_BUILD_ROOT/%{gemdir}/gems/app-%{version}/COPYRIGHT
+cp LICENSE $RPM_BUILD_ROOT/%{gemdir}/gems/startapp-%{version}/LICENSE
+cp COPYRIGHT $RPM_BUILD_ROOT/%{gemdir}/gems/startapp-%{version}/COPYRIGHT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -94,15 +94,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc LICENSE
 %doc COPYRIGHT
-%{_bindir}/app
-%{_mandir}/man1/app*
+%{_bindir}/startapp
+%{_mandir}/man1/startapp*
 %{_mandir}/man5/express*
-%{gemdir}/gems/app-%{version}/
-%{gemdir}/cache/app-%{version}.gem
-%{gemdir}/doc/app-%{version}
-%{gemdir}/specifications/app-%{version}.gemspec
+%{gemdir}/gems/startapp-%{version}/
+%{gemdir}/cache/startapp-%{version}.gem
+%{gemdir}/doc/startapp-%{version}
+%{gemdir}/specifications/startapp-%{version}.gemspec
 %config(noreplace) %{_sysconfdir}/openshift/express.conf
-%attr(0644,-,-) /etc/bash_completion.d/app
+%attr(0644,-,-) /etc/bash_completion.d/startapp
 
 %changelog
 * Tue Nov 19 2013 Adam Miller <admiller@redhat.com> 1.17.6-1

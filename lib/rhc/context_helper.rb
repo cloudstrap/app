@@ -94,7 +94,7 @@ module RHC
     end
 
     def server_context(defaults=nil, arg=nil)
-      value = ENV['LIBRA_SERVER'] || (!options.clean && config['libra_server']) || "broker.startapp.bg"
+      value = ENV['LIBRA_SERVER'] || (!options.clean && config['libra_server']) || "api.startappcloud.com"
       defaults[arg] = value if defaults && arg
       value
     end

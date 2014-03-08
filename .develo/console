@@ -1,0 +1,33 @@
+##########################################################################
+#                                                                        #
+#  This script is called when you write the command : "develo console"   #
+#  on project with installed .develo                                     #
+#                                                                        #
+#  This script is a perfect place for logic like:                        #
+#                                                                        #
+#  If you are working on Ruby on Rails project                           #
+#  | rails console                                                       #
+#                                                                        #
+#  ... or with some Ruby app                                             #
+#  | pry                                                                 #
+#    or                                                                  #
+#  | irb                                                                 #
+#                                                                        #
+#  If you are working on Django project                                  #
+#  | django-admin.py shell                                               #
+#    or                                                                  #
+#  | django-admin.py shell --interface bpython                           #
+#                                                                        #
+#  ... or with some Python app                                           #
+#  | python                                                              #
+#    or                                                                  #
+#  | bpython                                                             #
+#                                                                        #
+#                        And stuff like these :)                         #
+#                                                                        #
+##########################################################################
+
+####
+# Replace these lines of echo code with your meaningful implementation
+pry
+####

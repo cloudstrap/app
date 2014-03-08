@@ -33,7 +33,7 @@ module RHC::Commands
     option ['--autocomplete'], "Instructions for enabling tab-completion"
     def run
       if options.autocomplete
-        src = File.join(File.join(Gem.loaded_specs['app'].full_gem_path, "autocomplete"), "rhc_bash")
+        src = File.join(File.join(Gem.loaded_specs['startapp'].full_gem_path, "autocomplete"), "rhc_bash")
         dest = File.join(RHC::Config.home_conf_dir, "bash_autocomplete")
 
         FileUtils.mkdir_p(RHC::Config.home_conf_dir)

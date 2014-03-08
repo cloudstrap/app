@@ -1,7 +1,7 @@
 #
 # This is the bash auto completion script for the app command
 #
-_app()
+_startapp()
 {
   local cur opts prev
   COMPREPLY=()
@@ -1669,4 +1669,4 @@ _app()
   return 0
 }
 
-complete -o default -F _app app
+complete -o default -F _startapp app

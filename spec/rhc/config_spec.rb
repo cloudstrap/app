@@ -83,7 +83,7 @@ describe RHC::Config do
     its(:has_opts_config?){ should be_false }
 
     it "should return openshift.redhat.com for the server" do
-      subject['libra_server'].should == "broker.startapp.bg"
+      subject['libra_server'].should == "api.startappcloud.com"
     end
   end
 
@@ -115,7 +115,7 @@ describe RHC::Config do
                                                                      "global@redhat.com")
       subject.initialize
 
-      subject['libra_server'].should == "broker.startapp.bg"
+      subject['libra_server'].should == "api.startappcloud.com"
       subject.default_rhlogin.should == "global@redhat.com"
     end
   end
@@ -171,7 +171,7 @@ describe RHC::Config do
                                                 {"random_value" => 11})
         stub_config
 
-        subject['libra_server'].should == "broker.startapp.bg"
+        subject['libra_server'].should == "api.startappcloud.com"
         subject.default_rhlogin.should == "global@redhat.com"
         subject['random_value'].should == "11"
       end
@@ -254,7 +254,7 @@ describe RHC::Config do
         subject.check_cpath({"config" => ConfigHelper.opts_config_path,
                                  "random_val" => "ok"})
 
-        subject['libra_server'].should == "broker.startapp.bg"
+        subject['libra_server'].should == "api.startappcloud.com"
         subject.default_rhlogin.should == "global@redhat.com"
         subject['random_value'].should == "10"
         subject['local_value'].should == "local"

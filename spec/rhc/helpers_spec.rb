@@ -29,8 +29,8 @@ describe AllRhcHelpers do
     user_config
   end
 
-  its(:openshift_server) { should == 'broker.startapp.bg' }
-  its(:openshift_url) { should == 'https://broker.startapp.bg' }
+  its(:openshift_server) { should == 'api.startappcloud.com' }
+  its(:openshift_url) { should == 'https://api.startappcloud.com' }
 
   it("should display slashes"){ subject.system_path('foo/bar').should == 'foo/bar' }
   context "on windows" do

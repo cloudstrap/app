@@ -39,7 +39,7 @@ describe RHC::Commands::Setup do
   it{ expects_running('setup').should call(:run).on(instance).with(no_args) }
   it{ command_for('setup', '--clean').options.clean.should be_true }
 
-  it{ command_for('setup').options.server.should == 'broker.startapp.bg' }
+  it{ command_for('setup').options.server.should == 'api.startappcloud.com' }
   it{ command_for('setup', '--server', 'foo.com').options.server.should == 'foo.com' }
   it{ command_for('setup', '--no-create-token').options.create_token.should == false }
   it{ command_for('setup', '--create-token').options.create_token.should == true }
@@ -63,7 +63,7 @@ describe RHC::Commands::Setup do
   context 'when --clean is used' do
     let!(:config){ base_config{ |config, defaults| defaults.add 'libra_server', 'test.com' } }
 
-    it("should ignore a config value"){ command_for('setup', '--clean').options.server.should == 'broker.startapp.bg' }
+    it("should ignore a config value"){ command_for('setup', '--clean').options.server.should == 'api.startappcloud.com' }
   end
 
   context 'when -d is passed' do
@@ -105,7 +105,7 @@ describe RHC::Commands::Setup do
   describe '--autocomplete' do
     let(:arguments) { ['setup', '--autocomplete'] }
     before do
-      path = File.join(Gem.loaded_specs['app'].full_gem_path, "autocomplete")
+      path = File.join(Gem.loaded_specs['startapp'].full_gem_path, "autocomplete")
       FakeFS::FileUtils.mkdir_p(path)
       FakeFS::FileUtils.touch(File.join(path, "rhc_bash"))
     end

@@ -11,7 +11,7 @@ rescue LoadError
   rake_gempackage = true
 end
 
-spec = Gem::Specification.load('app.gemspec')
+spec = Gem::Specification.load('startapp.gemspec')
 
 # Define a :package task that bundles the gem
 if rake_gempackage

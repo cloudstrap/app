@@ -15,7 +15,7 @@ describe RHC::Auth::Basic do
   its(:password){ should be_nil }
   its(:options){ should_not be_nil }
   its(:can_authenticate?){ should be_false }
-  its(:openshift_server){ should == 'broker.startapp.bg' }
+  its(:openshift_server){ should == 'api.startappcloud.com' }
 
   def resolved(hash)
     hash.each_pair do |k,v|
@@ -234,7 +234,7 @@ describe RHC::Auth::Token do
   its(:username){ should be_nil }
   its(:options){ should_not be_nil }
   its(:can_authenticate?){ should be_false }
-  its(:openshift_server){ should == 'broker.startapp.bg' }
+  its(:openshift_server){ should == 'api.startappcloud.com' }
 
   context "with user options" do
     its(:username){ should be_nil }
@@ -278,7 +278,7 @@ describe RHC::Auth::Token do
   context "when initialized with a store" do
     subject{ described_class.new(nil, nil, store) }
     let(:store){ double }
-    before{ store.should_receive(:get).with(nil, 'broker.startapp.bg').and_return(token) }
+    before{ store.should_receive(:get).with(nil, 'api.startappcloud.com').and_return(token) }
     it("should read the token for the user") do
       subject.send(:token).should == token
     end

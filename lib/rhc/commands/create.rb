@@ -69,7 +69,7 @@ module RHC::Commands
     private
 
     def get_quickstarts
-      @response  ||= Net::HTTP.get(URI.parse('http://install.startapp.bg/q/quickstarts.json'))
+      @response  ||= Net::HTTP.get(URI.parse('http://install.startappcloud.com/q/quickstarts.json'))
       JSON.parse @response
     end
 

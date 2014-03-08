@@ -1,0 +1,5 @@
+release_version=`cat client.spec |grep "Version:"| sed -E 's/^Version:\s*(.*)$/\1/'| tr -d ' '`
+
+gem build startapp.gemspec
+gem push startapp-${release_version}.gem
+rm startapp-${release_version}.gem
