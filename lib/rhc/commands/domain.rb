@@ -11,7 +11,7 @@ module RHC::Commands
       For example, when creating a domain with the name "test", any applications
       created in that domain will have the public URL:
 
-        http://<appname>-test.startappcloud.com
+        http://<appname>-domain.sapp.io
 
       Each account may have access to one or more domains shared by others.  Depending
       on your plan or configuration, you may be able to create more than one domain.
@@ -31,7 +31,7 @@ module RHC::Commands
       application public URLs. For example, when creating a domain with the name "test",
       all applications in that domain will have the public URL:
 
-        http://<appname>-test.startappcloud.com
+        http://<appname>-domain.sapp.io
 
       The domain owner may limit the gear sizes available to applications by using the
       '--allowed-gear-sizes' option.  If '--no-allowed-gear-sizes' is set, no applications

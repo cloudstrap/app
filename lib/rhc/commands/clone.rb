@@ -21,7 +21,7 @@ module RHC::Commands
           app_name = options.app = app[:name]
           options.namespace = app[:domain]
         else
-          warn "URL is invalid. To clone app your url must be something like this: http://appname-domain.startappcloud.com/"
+          warn "URL is invalid. To clone app your url must be something like this: http://appname-domain.sapp.io/"
           return 1
         end
       end
@@ -47,7 +47,7 @@ module RHC::Commands
     end
 
     def startapp_url?(candidate)
-      !!(/[a-zA-Z0-9]+-[a-zA-Z0-9]+\.startappcloud\./.match(candidate))
+      !!(/[a-zA-Z0-9]+-[a-zA-Z0-9]+\.sapp\./.match(candidate))
     end
 
     def clean_url(url)

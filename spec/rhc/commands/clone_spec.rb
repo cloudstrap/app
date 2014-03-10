@@ -15,21 +15,21 @@ describe RHC::Commands::Clone do
     end
 
     context 'with valid url and no domains' do
-      let(:arguments) { ['clone','http://myapp-mydomain.startappcloud.com'] }
+      let(:arguments) { ['clone','http://myapp-mydomain.sapp.io'] }
 
       it { expect { run }.to exit_with_code(127) }
       it { run_output.should match(/Domain *mydomain* not found/) }
     end
 
     context 'with valid url and domain' do
-      let(:arguments) { ['clone','http://myapp-myfirsrdomain.startappcloud.com'] }
+      let(:arguments) { ['clone','http://myapp-myfirsrdomain.sapp.io'] }
       let!(:domain){ rest_client.add_domain("myfirsrdomain") }
 
       it { expect { run }.to exit_with_code(101) }
       it { run_output.should match(/Application myapp does not exist/) }
 
       context 'with apps' do
-        let(:arguments) { ['clone','http://myapp-myfirsrdomain.startappcloud.com'] }
+        let(:arguments) { ['clone','http://myapp-myfirsrdomain.sapp.io'] }
         before{ domain.add_application('myapp') }
 
         it { expect { run }.to exit_with_code(216) }

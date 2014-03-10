@@ -6,13 +6,13 @@ module RHC::Commands
     summary "Deploy a git reference or binary file of an application"
     syntax "<ref> --app NAME [--namespace NAME]"
     description <<-DESC
-      By default OpenShift applications prepare, distribute, and activate deployments
+      By default StartApp applications prepare, distribute, and activate deployments
       on every git push. Alternatively, a user may choose to disable automatic
-      deployments and use 'rhc deploy' and 'rhc deployment' commands to fully control the
+      deployments and use 'app deploy' and 'app deployment' commands to fully control the
       deployment lifecycle.
 
       Use this command to prepare, distribute and deploy manually from a git reference
-      (commit id, tag or branch) or from a binary file. Check also 'rhc configure-app'
+      (commit id, tag or branch) or from a binary file. Check also 'app configure-app'
       to configure your application to deploy manually and set the number of deployments
       to keep in history.
 
