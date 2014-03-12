@@ -63,7 +63,7 @@ describe RHC::Commands::GitClone do
             end
           end
           let(:arguments) { ['git-clone', 'app2'] }
-          it { run_output.should match("Added remote startapp pointing to git://test") }
+          it { run_output.should match("Added remote upstream pointing to git://test") }
         end
 
       end
