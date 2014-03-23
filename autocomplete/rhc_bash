@@ -192,7 +192,7 @@ _startapp()
         if [[ "$cur" == -* ]]; then
           opts=""
         else
-          opts="env snapshot create delete start stop scale-up scale-down force-stop restart reload tidy show deploy configure"configure env snapshot"
+          opts="env snapshot create delete start stop scale-up scale-down force-stop restart reload tidy show deploy configure env snapshot"
         fi
         ;;
 
