@@ -25,7 +25,7 @@ describe RHC::Rest::Domain do
   let(:domain) { subject.domains.first }
   context "against a 1.2 server" do
     before{ stub_api_v12; stub_one_domain('bar') }
-    before do 
+    before do
       stub_api_request(:post, 'broker/rest/domains/bar/applications', false).
         with(:body => {:name => 'foo', :cartridge => 'bar'}.to_json).
         to_return(:status => 201, :body => {:type => 'application', :data => {:id => '1'}}.to_json)
@@ -42,7 +42,7 @@ describe RHC::Rest::Domain do
   context "against a server that supports initial git urls and downloaded carts" do
     let(:cartridges){ ['bar'] }
     before{ stub_api; stub_one_domain('bar', [{:name => 'initial_git_url'},{:name => 'cartridges[][url]'}]) }
-    before do 
+    before do
       stub_api_request(:post, 'broker/rest/domains/bar/applications', false).
         with(:body => {:name => 'foo', :cartridges => cartridges}.to_json).
         to_return(:status => 201, :body => {:type => 'application', :data => {:id => '1'}}.to_json)
@@ -77,7 +77,7 @@ describe RHC::Rest::Domain do
       it{ domain.add_application('foo', :cartridges => [{:url => 'a_url'}]).should be_true }
       it{ domain.add_application('foo', :cartridge => RHC::Rest::Cartridge.for_url('a_url')).should be_true }
       it{ domain.add_application('foo', :cartridge => [{'url' => 'a_url'}]).should be_true }
-    end      
+    end
   end
 end
 
@@ -412,7 +412,7 @@ module RHC
         let(:method){ :post }
         it "serializes payload as urlencoded body parameters" do
           stub_request(method, mock_href).
-            with(:headers => {:accept => 'application/json', :content_type => 'application/json'}, 
+            with(:headers => {:accept => 'application/json', :content_type => 'application/json'},
                  :body => {:test => '1', :bar => 2}.to_json).
             to_return(:status => 204)
           subject.request(request.merge(:payload => {:test => '1', :bar => 2})).should be_nil
@@ -683,7 +683,7 @@ module RHC
         let(:code){ 500 }
 
         it "raises a generic server error" do
-          method.should raise_error(RHC::Rest::ServerErrorException, /server did not respond correctly.*verify that you can access the OpenShift server/i)
+          method.should raise_error(RHC::Rest::ServerErrorException, /server did not respond correctly.*verify that you can access the StartApp server/i)
         end
 
         context "when proxy is set" do

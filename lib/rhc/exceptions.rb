@@ -67,6 +67,24 @@ module RHC
     end
   end
 
+  class TeamsNotSupportedException < Exception
+    def initialize(message="Server does not support teams")
+      super message, 161
+    end
+  end
+
+  class TeamNotFoundException < Exception
+    def initialize(message="Team not found")
+      super message, 162
+    end
+  end
+
+  class MemberNotFoundException < Exception
+    def initialize(message="Member not found")
+      super message, 163
+    end
+  end
+
   class GitPermissionDenied < GitException; end
   class GitDirectoryExists < GitException; end
 
@@ -138,6 +156,12 @@ module RHC
     end
   end
 
+  class AppCloneNotSupportedException < Exception
+    def initialize(message="The server does not support cloning apps")
+      super message, 134
+    end
+  end
+
   class MissingScalingValueException < Exception
     def initialize(message="Must provide either a min or max value for scaling")
       super message
@@ -190,13 +214,13 @@ module RHC
   end
 
   class ChangeMembersOnResourceNotSupported < Exception
-    def initialize(message="You can only add or remove members on a domain.")
+    def initialize(message="You can only add or remove members on a domain or team.")
       super message, 1
     end
   end
 
   class MembersNotSupported < Exception
-    def initialize(message="The server does not support adding or removing members.")
+    def initialize(message="The server does not support adding or removing members on this resource.")
       super message, 1
     end
   end

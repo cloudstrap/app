@@ -60,7 +60,7 @@ module RHC
     # :nocov: These all call external binaries so test them in cucumber
     def git_config_get(key)
       return nil unless has_git?
-
+      
       config_get_cmd = "#{git_cmd} config --get #{key}"
       value = %x[#{config_get_cmd}].strip
       debug "Git config '#{config_get_cmd}' returned '#{value}'"

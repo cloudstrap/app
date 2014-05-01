@@ -1,6 +1,24 @@
 module RHC
   module OutputHelpers
 
+    def display_team(team, ids=false)
+      paragraph do
+        header ["Team #{team.name}", ("(owned by #{team.owner})" if team.owner.present?)] do
+          section(:bottom => 1) do
+            say format_table \
+              nil,
+              get_properties(
+                team,
+                (:id if ids),
+                (:global if team.global?),
+                :compact_members
+              ),
+              :delete => true
+          end
+        end
+      end
+    end
+
     def display_domain(domain, applications=nil, ids=false)
       paragraph do
         header ["Domain #{domain.name}", ("(owned by #{domain.owner})" if domain.owner.present?)] do
@@ -26,7 +44,7 @@ module RHC
     #---------------------------
     # Application information
     #---------------------------
-    def display_app(app, cartridges=nil, properties=nil)
+    def display_app(app, cartridges=nil, properties=nil, verbose=false)
       paragraph do
         header [app.name, "@ #{app.app_url}", "(uuid: #{app.uuid})"] do
           section(:bottom => 1) do
@@ -43,7 +61,7 @@ module RHC
                 :aliases]),
               :delete => true
           end
-          cartridges.each{ |c| section(:bottom => 1){ display_cart(c) } } if cartridges
+          cartridges.each{ |c| section(:bottom => 1){ display_cart(c, verbose ? :verbose : []) } } if cartridges
         end
       end
     end
@@ -69,6 +87,8 @@ module RHC
         format_scaling_info(cart.scaling)
       elsif cart.shares_gears?
         "Located with #{cart.collocated_with.join(", ")}"
+      elsif cart.external? && cart.current_scale == 0
+        "none (external service)"
       else
         "%d %s" % [format_value(:current_scale, cart.current_scale), format_value(:gear_profile, cart.gear_profile)]
       end
@@ -84,13 +104,18 @@ module RHC
     #---------------------------
 
     def display_cart(cart, *properties)
+      verbose = properties.delete(:verbose)
       say format_table \
         format_cart_header(cart),
-        get_properties(cart, *properties).
-          concat([[:downloaded_cartridge_url, cart.url]]).
-          concat([[cart.scalable? ? :scaling : :gears, format_cart_gears(cart)]]).
-          concat(cart.properties.map{ |p| ["#{table_heading(p['name'])}:", p['value']] }.sort{ |a,b| a[0] <=> b[0] }).
-          concat(cart.environment_variables.present? ? [[:environment_variables, cart.environment_variables.map{|item| "#{item[:name]}=#{item[:value]}" }.sort.join(', ')]] : []),
+          get_properties(cart, *properties).
+            concat(verbose && cart.custom? ? [[:description, cart.description.strip]] : []).
+            concat([[:downloaded_cartridge_url, cart.url]]).
+            concat(verbose && cart.custom? ? [[:version, cart.version]] : []).
+            concat(verbose && cart.custom? && cart.license.strip.downcase != 'unknown' ? [[:license, cart.license]] : []).
+            concat(cart.custom? ? [[:website, cart.website]] : []).
+            concat([[cart.scalable? ? :scaling : :gears, format_cart_gears(cart)]]).
+            concat(cart.properties.map{ |p| ["#{table_heading(p['name'])}:", p['value']] }.sort{ |a,b| a[0] <=> b[0] }).
+            concat(cart.environment_variables.present? ? [[:environment_variables, cart.environment_variables.map{|item| "#{item[:name]}=#{item[:value]}" }.sort.join(', ')]] : []),
         :delete => true
 
       say format_usage_message(cart) if cart.usage_rate?
@@ -248,7 +273,7 @@ module RHC
         when :activations
           value.collect{|item| date(item.created_at.to_s)}.join("\n")
         when :auto_deploy
-          value ? 'auto (on git push)' : "manual (use 'rhc deploy')"
+          value ? 'auto (on git push)' : "manual (use 'app deploy')"
         else
           case value
           when Array then value.empty? ? '<none>' : value.join(', ')

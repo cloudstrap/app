@@ -67,7 +67,7 @@ module RHC
         if !api_version_match?
           warn "WARNING: API version mismatch. This client supports #{client_api_versions.join(', ')} but
 server at #{URI.parse(client.url).host} supports #{@server_api_versions.join(', ')}."
-          warn "The client version may be outdated; please consider updating 'rhc'. We will continue, but you may encounter problems."
+          warn "The client version may be outdated; please consider updating 'app'. We will continue, but you may encounter problems."
         end
       end
 

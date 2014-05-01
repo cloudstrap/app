@@ -36,10 +36,21 @@ module RHC
       end
 
       def applications(options={})
+        debug "Getting applications"
         if link = api.link_href(:LIST_APPLICATIONS)
           api.rest_method :LIST_APPLICATIONS, options
         else
           self.domains.map{ |d| d.applications(options) }.flatten
+        end
+      end
+
+      def owned_applications(options={})
+        debug "Getting owned applications"
+        if link = api.link_href(:LIST_APPLICATIONS_BY_OWNER)
+          @owned_applications ||= api.rest_method 'LIST_APPLICATIONS_BY_OWNER', :owner => '@self'
+        else
+          owned_domains_names = owned_domains.map{|d| d.name}
+          @owned_applications ||= applications(options).select{|app| owned_domains_names.include?(app.domain)}
         end
       end
 
@@ -53,7 +64,79 @@ module RHC
         @user ||= api.rest_method "GET_USER"
       end
 
-      #Find Domain by namesapce
+      def add_team(name, payload={})
+        debug "Adding team #{name} with options #{payload.inspect}"
+        @teams = nil
+        payload.delete_if{ |k,v| k.nil? or v.nil? }
+        if api.supports? 'ADD_TEAM'
+          api.rest_method "ADD_TEAM", {:name => name}.merge(payload)
+        else
+          raise RHC::TeamsNotSupportedException
+        end
+      end
+
+      def teams(opts={})
+        debug "Getting teams you are a member of"
+        if link = api.link_href(:LIST_TEAMS)
+          @teams ||= api.rest_method("LIST_TEAMS", opts)
+        else
+          raise RHC::TeamsNotSupportedException
+        end
+      end
+
+      def owned_teams(opts={})
+        debug "Getting owned teams"
+        if link = api.link_href(:LIST_TEAMS_BY_OWNER)
+          @owned_teams ||= api.rest_method("LIST_TEAMS_BY_OWNER", opts.merge({:owner => '@self'}))
+        else
+          raise RHC::TeamsNotSupportedException
+        end
+      end
+
+      def search_teams(search, global=false)
+        debug "Searching teams"
+        if link = api.link_href(:SEARCH_TEAMS)
+          api.rest_method "SEARCH_TEAMS", :search => search, :global => global
+        else
+          raise RHC::TeamsNotSupportedException
+        end
+      end
+
+      def search_owned_teams(search)
+        debug "Searching owned teams"
+        owned_teams.select{|team| team.name.downcase =~ /#{Regexp.escape(search)}/i}
+      end
+
+      def find_team(name, options={})
+        precheck_team_id(name)
+
+        matching_teams = if options[:global]
+          search_teams(name, true).select { |t| t.name == name }
+        elsif options[:owned]
+          owned_teams.select { |t| t.name == name }
+        else
+          teams.select{ |t| t.name == name }
+        end
+
+        if matching_teams.blank?
+          raise TeamNotFoundException.new("Team with name #{name} not found")
+        elsif matching_teams.length > 1
+          raise TeamNotFoundException.new("Multiple teams with name #{name} found. Use --team-id to select the team by id.")
+        else
+          matching_teams.first
+        end
+      end
+
+      def find_team_by_id(id, options={})
+        precheck_team_id(id)
+        if api.supports? :show_team
+          request(:url => link_show_team_by_id(id), :method => "GET", :payload => options)
+        else
+          teams.find{ |t| t.id == id }
+        end or raise TeamNotFoundException.new("Team with id #{id} not found")
+      end
+
+      #Find Domain by namespace
       def find_domain(id)
         debug "Finding domain #{id}"
         if link = api.link_href(:SHOW_DOMAIN, ':name' => id)
@@ -64,18 +147,25 @@ module RHC
       end
 
       def find_application(domain, application, options={})
+        precheck_domain_id(domain)
+        precheck_application_id(application)
         request(:url => link_show_application_by_domain_name(domain, application), :method => "GET", :payload => options)
       end
 
       def find_application_gear_groups(domain, application, options={})
+        precheck_domain_id(domain)
+        precheck_application_id(application)
         request(:url => link_show_application_by_domain_name(domain, application, "gear_groups"), :method => "GET", :payload => options)
       end
 
       def find_application_aliases(domain, application, options={})
+        precheck_domain_id(domain)
+        precheck_application_id(application)
         request(:url => link_show_application_by_domain_name(domain, application, "aliases"), :method => "GET", :payload => options)
       end
 
       def find_application_by_id(id, options={})
+        precheck_application_id(id)
         if api.supports? :show_application
           request(:url => link_show_application_by_id(id), :method => "GET", :payload => options)
         else
@@ -84,11 +174,28 @@ module RHC
       end
 
       def find_application_by_id_gear_groups(id, options={})
+        precheck_application_id(id)
         if api.supports? :show_application
           request(:url => link_show_application_by_id(id, 'gear_groups'), :method => "GET", :payload => options)
         else
           applications.find{ |a| return a.gear_groups if a.id == id }
         end or raise ApplicationNotFoundException.new("Application with id #{id} not found")
+      end
+
+      # Catch domain ids which we can't make API calls for
+      def precheck_domain_id(domain)
+        raise DomainNotFoundException.new("Domain not specified") if domain.blank?
+        raise DomainNotFoundException.new("Domain #{domain} not found") if ['.','..'].include?(domain)
+      end
+
+      def precheck_application_id(application)
+        raise ApplicationNotFoundException.new("Application not specified") if application.blank?
+        raise ApplicationNotFoundException.new("Application #{application} not found") if ['.','..'].include?(application)
+      end
+
+      def precheck_team_id(team)
+        raise TeamNotFoundException.new("Team not specified") if team.blank?
+        raise TeamNotFoundException.new("Team #{team} not found") if ['.','..'].include?(team)
       end
 
       def link_show_application_by_domain_name(domain, application, *args)
@@ -106,6 +213,10 @@ module RHC
 
       def link_show_domain_by_name(domain, *args)
         api.link_href(:SHOW_DOMAIN, ':id' => domain)
+      end
+
+      def link_show_team_by_id(id, *args)
+        api.link_href(:SHOW_TEAM, {':id' => id}, *args)
       end
 
       #Find Cartridge by name or regex
@@ -300,7 +411,7 @@ module RHC
             raise TimeoutException.new(
               "Connection to server timed out. "\
               "It is possible the operation finished without being able "\
-              "to report success. Use 'rhc domain show' or 'rhc app show' "\
+              "to report success. Use 'app domain show' or 'app app show' "\
               "to see the status of your applications.", e)
           rescue EOFError => e
             raise ConnectionException.new(
@@ -344,7 +455,7 @@ module RHC
           rescue SocketError, Errno::ECONNREFUSED => e
             raise ConnectionException.new(
               "Unable to connect to the server (#{e.message})."\
-              "#{client.proxy.present? ? " Check that you have correctly specified your proxy server '#{client.proxy}' as well as your OpenShift server '#{args[1]}'." : " Check that you have correctly specified your OpenShift server '#{args[1]}'."}")
+              "#{client.proxy.present? ? " Check that you have correctly specified your proxy server '#{client.proxy}' as well as your StartApp server '#{args[1]}'." : " Check that you have correctly specified your StartApp server '#{args[1]}'."}")
           rescue Errno::ECONNRESET => e
             raise ConnectionException.new(
               "The server has closed the connection unexpectedly (#{e.message}). Your last operation may still be running on the server; please check before retrying your last request.")
@@ -478,7 +589,7 @@ module RHC
             return true if i == 0 && args[0] == :get
             raise ConnectionException.new(
               "An error occurred while communicating with the server. This problem may only be temporary."\
-              "#{client.proxy.present? ? " Check that you have correctly specified your proxy server '#{client.proxy}' as well as your OpenShift server '#{args[1]}'." : " Check that you have correctly specified your OpenShift server '#{args[1]}'."}")
+              "#{client.proxy.present? ? " Check that you have correctly specified your proxy server '#{client.proxy}' as well as your StartApp server '#{args[1]}'." : " Check that you have correctly specified your StartApp server '#{args[1]}'."}")
           end
         end
 
@@ -520,6 +631,14 @@ module RHC
             data.map{ |json| EnvironmentVariable.new(json, self) }
           when 'deployments'
             data.map{ |json| Deployment.new(json, self) }
+          when 'team'
+            Team.new(data, self)
+          when 'teams'
+            data.map{ |json| Team.new(json, self) }
+          when 'member'
+            RHC::Rest::Membership::Member.new(data, self)
+          when 'members'
+            data.map{ |json| RHC::Rest::Membership::Member.new(json, self) }
           else
             data
           end
@@ -576,7 +695,7 @@ module RHC
           "The server did not respond correctly. This may be an issue "\
           "with the server configuration or with your connection to the "\
           "server (such as a Web proxy or firewall)."\
-          "#{client.proxy.present? ? " Please verify that your proxy server is working correctly (#{client.proxy}) and that you can access the OpenShift server #{url}" : " Please verify that you can access the OpenShift server #{url}"}"
+          "#{client.proxy.present? ? " Please verify that your proxy server is working correctly (#{client.proxy}) and that you can access the StartApp server #{url}" : " Please verify that you can access the StartApp server #{url}"}"
         end
 
         def handle_error!(response, url, client)

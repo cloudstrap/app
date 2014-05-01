@@ -426,18 +426,27 @@ module RHC::Rest::Mock
     end
 
     def mock_client_links
-      [['GET_USER',        'user/',       'get' ],
+      mock_teams_links.concat([
+       ['GET_USER',        'user/',       'get' ],
        ['ADD_DOMAIN',      'domains/add', 'post'],
        ['LIST_DOMAINS',    'domains/',    'get' ],
-       ['LIST_CARTRIDGES', 'cartridges/', 'get' ]]
+       ['LIST_CARTRIDGES', 'cartridges/', 'get' ]
+      ])
     end
 
     def mock_real_client_links
-      [['GET_USER',        "broker/rest/user",       'GET'],
-       ['LIST_DOMAINS',    "broker/rest/domains",    'GET'],
-       ['ADD_DOMAIN',      "broker/rest/domains",    'POST', ({'optional_params' => [{'name' => 'allowed_gear_sizes'}]} if example_allows_gear_sizes?)].compact,
-       ['LIST_CARTRIDGES', "broker/rest/cartridges", 'GET'],
-      ]
+      mock_teams_links.concat([
+       ['GET_USER',               "broker/rest/user",       'GET'],
+       ['LIST_DOMAINS',           "broker/rest/domains",    'GET'],
+       ['ADD_DOMAIN',             "broker/rest/domains",    'POST', ({'optional_params' => [{'name' => 'allowed_gear_sizes'}]} if example_allows_gear_sizes?)].compact,
+       ['LIST_CARTRIDGES',        "broker/rest/cartridges", 'GET'],
+      ])
+    end
+
+    def mock_teams_links
+      [['SEARCH_TEAMS',           "broker/rest/teams",      'GET'],
+       ['LIST_TEAMS',             "broker/rest/teams",      'GET'],
+       ['LIST_TEAMS_BY_OWNER',    "broker/rest/teams",      'GET']]
     end
 
     def mock_api_with_authorizations
@@ -448,8 +457,17 @@ module RHC::Rest::Mock
       ])
     end
 
+    def mock_team_links(team_id='test_team')
+      [['GET',            "team/#{team_id}",          'get'    ],
+       ['ADD_MEMBER',     "team/#{team_id}/members/", 'post', {'optional_params' => [{'name' => 'id'}, {'name' => 'login'}], 'required_params' => [{'name' => 'role'}]} ],
+       ['LIST_MEMBERS',   "team/#{team_id}/update",   'get'    ],
+       ['UPDATE_MEMBERS', "team/#{team_id}/delete",   'patch', {'optional_params' => [{'name' => 'id'}, {'name' => 'login'}, {'name' => 'members'}] } ],
+       ['LEAVE',          "team/#{team_id}/delete",   'delete' ],
+       ['DELETE',         "team/#{team_id}/delete",   'delete' ]]
+    end
+
     def mock_domain_links(domain_id='test_domain')
-      [['ADD_APPLICATION',   "domains/#{domain_id}/apps/add", 'post', {'optional_params' => [{'name' => 'environment_variables'}]} ],
+      [['ADD_APPLICATION',   "domains/#{domain_id}/apps/add", 'post', {'optional_params' => [{'name' => 'environment_variables'}, {'name' => 'cartridges[][name]'}, {'name' => 'cartridges[][url]'}]} ],
        ['LIST_APPLICATIONS', "domains/#{domain_id}/apps/",    'get' ],
        ['UPDATE',            "domains/#{domain_id}/update",   'put'],
        ['DELETE',            "domains/#{domain_id}/delete",   'post']]
@@ -538,6 +556,7 @@ module RHC::Rest::Mock
         end
       end
       @domains = []
+      @teams = []
       @user = MockRestUser.new(self, config.username)
       @api = MockRestApi.new(self, config)
       @version = version
@@ -553,6 +572,10 @@ module RHC::Rest::Mock
 
     def domains
       @domains
+    end
+
+    def teams(opts={})
+      @teams
     end
 
     def api_version_negotiated
@@ -575,6 +598,15 @@ module RHC::Rest::Mock
        MockRestCartridge.new(self, "embcart-2", "embedded"),
        premium_embedded
       ]
+    end
+
+    def add_team(name, extra=false)
+      t = MockRestTeam.new(self, name)
+      if extra
+        t.attributes['members'] = [{'owner' => true, 'name' => 'a_user_name'}]
+      end
+      @teams << t
+      t
     end
 
     def add_domain(id, extra=false)
@@ -660,6 +692,35 @@ module RHC::Rest::Mock
     end
   end
 
+  class MockRestTeam < RHC::Rest::Team
+    include Helpers
+    def initialize(client, name, id="123")
+      super({}, client)
+      @id = id
+      @name = name
+      @members = []
+      self.attributes = {:links => mock_response_links(mock_team_links(id))}
+    end
+
+    def destroy
+      raise RHC::OperationNotSupportedException.new("The server does not support deleting this resource.") unless supports? 'DELETE'
+      client.teams.delete_if { |t| t.name == @name }
+    end
+
+    def init_members
+      @members ||= []
+      attributes['members'] ||= []
+      self
+    end
+
+    def add_member(member)
+      (@members ||= []) << member
+      (attributes['members'] ||= []) << member.attributes
+      self
+    end
+
+  end
+
   class MockRestDomain < RHC::Rest::Domain
     include Helpers
     def initialize(client, id)
@@ -686,6 +747,7 @@ module RHC::Rest::Mock
         scale = type[:scale]
         gear_profile = type[:gear_profile]
         git_url = type[:initial_git_url]
+        tags = type[:tags]
         type = Array(type[:cartridges] || type[:cartridge])
       end
       a = MockRestApplication.new(client, name, type, self, scale, gear_profile, git_url)
@@ -698,6 +760,12 @@ module RHC::Rest::Mock
 
     def applications(*args)
       @applications
+    end
+
+    def init_members
+      @members ||= []
+      attributes['members'] ||= []
+      self
     end
 
     def add_member(member)
@@ -904,6 +972,12 @@ module RHC::Rest::Mock
       else
         raise RHC::EnvironmentVariablesNotSupportedException.new
       end
+    end
+
+    def init_members
+      @members ||= []
+      attributes['members'] ||= []
+      self
     end
 
     def add_member(member)
