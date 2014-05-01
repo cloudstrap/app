@@ -3,3 +3,6 @@ release_version=`cat client.spec |grep "Version:"| sed -E 's/^Version:\s*(.*)$/\
 gem build startapp.gemspec
 gem push startapp-${release_version}.gem
 rm startapp-${release_version}.gem
+
+git tag startapp-${release_version}
+git push origin --tags

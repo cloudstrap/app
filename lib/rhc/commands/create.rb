@@ -39,9 +39,10 @@ module RHC::Commands
     syntax "<name> <cartridge> [... <cartridge>] [... VARIABLE=VALUE] [-n namespace]"
     option ["-n", "--namespace NAME"], "Namespace for the application"
     option ["-g", "--gear-size SIZE"], "Gear size controls how much memory and CPU your cartridges can use."
-    option ["-s", "--scaling"], "Enable scaling for the web cartridge."
+    option ["-s", "--[no-]scaling"], "Enable scaling for the web cartridge."
     option ["-r", "--repo DIR"], "Path to the Git repository (defaults to ./$app_name)"
     option ["-e", "--env VARIABLE=VALUE"], "Environment variable(s) to be set on this app, or path to a file containing environment variables", :type => :list
+    option ["--from-app NAME"], "Create based on another application. All content and configurations will be copied from the original app."
     option ["--from-code URL"], "URL to a Git repository that will become the initial contents of the application"
     option ["--[no-]git"], "Skip creating the local Git repository."
     option ["--[no-]dns"], "Skip waiting for the application DNS name to resolve. Must be used in combination with --no-git"
