@@ -727,7 +727,7 @@ WARNING:  Your application was created successfully but had problems during
   If you continue to experience problems after completing these steps,
   you can try destroying and recreating the application:
 
-    $ app app delete #{rest_app.name} --confirm
+    $ app delete #{rest_app.name} --confirm
 
   Please contact us if you are unable to successfully create your
   application:
